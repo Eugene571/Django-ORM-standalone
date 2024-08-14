@@ -13,7 +13,7 @@ from datacenter.models import Passcard, Visit, get_duration, convert_seconds, is
 if __name__ == '__main__':
 
     all_passcards = Passcard.objects.all()
-    print(all_passcards, '\n')
+    print('Все пропуски: ', all_passcards, '\n')
 
     example_passcard = Passcard.objects.all()[0]
     print(f'owner_name: {example_passcard.owner_name}\n'
@@ -30,24 +30,27 @@ if __name__ == '__main__':
           )
 
     all_visits = Visit.objects.all()
-    print(all_visits)
+    print('Все визиты пользователей: ', all_visits, '\n')
 
     currently_in_storage = Visit.objects.filter(leaved_at=None)
-    print(currently_in_storage, '\n')
+    print('Список незакрытых визитов: ', currently_in_storage, '\n')
 
     for visit in all_visits:
         if visit.leaved_at is None:
             current_duration = math.trunc(get_duration(visit))
-            print(f'Зашёл в хранилище, время по Москве: \n{visit.entered_at}\n'
+            print(f'{visit.passcard.owner_name} зашёл в хранилище, время по Москве: \n{visit.entered_at}\n'
                   'Находится в хранилище:', '\n', convert_seconds(current_duration), '\n'
                   )
-            print(visit.passcard, '\n')
+
+    print('Сейчас в хранилище находятся:')
+    for visit in currently_in_storage:
+        print(visit.passcard.owner_name)
 
     person_0_visits = all_visits[0].passcard
     all_passes_0 = Visit.objects.filter(passcard=person_0_visits)
-    print(all_passes_0)
+    print('\n' f'Все визиты по пропуску {person_0_visits.owner_name}: ', all_passes_0, '\n')
 
     current_year = timezone.now().year
     visits_current_year = Visit.objects.filter(entered_at__year=current_year).order_by('-entered_at')
     suspicious_visits_hour = is_visit_long(visits_current_year, 60, limit=10)
-    print(f"Визиты дольше 1 часа: {suspicious_visits_hour}")
+    print(f'Визиты дольше 1 часа: {suspicious_visits_hour}')
